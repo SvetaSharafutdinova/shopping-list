@@ -1,0 +1,141 @@
+.page {
+  padding: 16px;
+  background-color: #fdfaf2;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #a6cf4a;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.list-header__title {
+  margin: 0;
+}
+
+.list-header__archived {
+  font-size: 0.8rem;
+  margin-left: 8px;
+}
+
+.list-header__right button {
+  margin-left: 8px;
+}
+
+.content {
+  display: flex;
+  gap: 16px;
+}
+
+/* панели */
+
+.panel {
+  background: #fdf3d7;
+  border-radius: 4px;
+  padding: 8px 12px 12px;
+  flex: 1;
+}
+
+.panel__header {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+/* members */
+
+.members-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.member-row__icon {
+  margin-right: 6px;
+}
+
+.member-row__name {
+  flex: 1;
+}
+
+.member-row__leave {
+  margin-right: 4px;
+}
+
+.members-panel__add {
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* items */
+
+.items-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.item-row__status {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #a6cf4a;
+  background: white;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.item-row__status--done {
+  background: #a6cf4a;
+  color: white;
+}
+
+.item-row__name {
+  flex: 1;
+}
+
+.item-row__name--done {
+  text-decoration: line-through;
+  color: #777;
+}
+
+.items-panel__add {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.filter-button {
+  font-size: 0.8rem;
+}
+
+/* Респонсивность: */
+
+@media (max-width: 768px) {
+  .content {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 769px) {
+  .content > .panel {
+    flex: 1;
+  }
+}
