@@ -34,8 +34,6 @@
   gap: 16px;
 }
 
-/* панели */
-
 .panel {
   background: #fdf3d7;
   border-radius: 4px;
@@ -47,8 +45,6 @@
   font-weight: bold;
   margin-bottom: 8px;
 }
-
-/* members */
 
 .members-list {
   list-style: none;
@@ -78,8 +74,6 @@
   margin-top: 8px;
   width: 100%;
 }
-
-/* items */
 
 .items-list {
   list-style: none;
@@ -126,7 +120,179 @@
   font-size: 0.8rem;
 }
 
-/* Респонсивность: */
+.OverviewRoot {
+  min-height: 100vh;
+  background: #f3f5f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+.OverviewHeader {
+  background: #8bc34a;
+  color: #fff;
+  padding: 16px 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.OverviewHeader h1 {
+  margin: 0;
+}
+
+.OverviewToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  gap: 16px;
+}
+
+.OverviewToolbarLeft,
+.OverviewToolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ToolbarButton,
+.PrimaryButton,
+.DeleteButton {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.ToolbarButton {
+  background: #e0e0e0;
+}
+
+.PrimaryButton {
+  background: #ff9800;
+  color: #fff;
+}
+
+.DeleteButton {
+  background: #f44336;
+  color: #fff;
+}
+
+.DeleteButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.OverviewGrid {
+  padding: 0 24px 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.Tile {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.TileMain {
+  flex: 1;
+  cursor: pointer;
+}
+
+.TileTitleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.TileTitle {
+  font-weight: 600;
+}
+
+.TileBadge {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #9e9e9e;
+  color: #fff;
+}
+
+.TileMeta {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+  color: #555;
+}
+
+.TileActions {
+  display: flex;
+  align-items: flex-start;
+  margin-left: 8px;
+}
+
+.OverviewEmpty {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+}
+
+.ModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.Modal {
+  background: #ffffff;
+  padding: 20px 24px;
+  border-radius: 8px;
+  max-width: 420px;
+  width: 100%;
+  margin: 0 12px;
+}
+
+.ModalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ModalField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.ModalField input {
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.ModalCheckbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.ModalButtons {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
 
 @media (max-width: 768px) {
   .content {
@@ -134,8 +300,17 @@
   }
 }
 
-@media (min-width: 769px) {
-  .content > .panel {
-    flex: 1;
+@media (max-width: 600px) {
+  .OverviewToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .OverviewGrid {
+    padding: 0 12px 12px;
+  }
+
+  .Modal {
+    width: calc(100% - 24px);
   }
 }
