@@ -1,14 +1,38 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../App.css";
+import api from "../api/shoppingListApi";
 
-function ShoppingListOverviewRoute({ lists, onCreateList, onDeleteList, onOpenList }) {
+function ShoppingListOverviewRoute({ onOpenList }) {
   const [showArchived, setShowArchived] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newArchived, setNewArchived] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const visibleLists = lists.filter((list) => showArchived || !list.isArchived);
+  const [lists, setLists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  async function load() {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.list({ includeArchived: true });
+      setLists(res.itemList || []);
+    } catch (e) {
+      setError(e?.message || "Failed to load lists");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const visibleLists = useMemo(() => {
+    return lists.filter((list) => showArchived || !list.isArchived);
+  }, [lists, showArchived]);
 
   function handleToggleFilter() {
     setShowArchived((prev) => !prev);
@@ -24,19 +48,19 @@ function ShoppingListOverviewRoute({ lists, onCreateList, onDeleteList, onOpenLi
     setNewArchived(false);
   }
 
-  function handleAddSubmit(event) {
+  async function handleAddSubmit(event) {
     event.preventDefault();
     const trimmedName = newName.trim();
     if (!trimmedName) return;
 
-    onCreateList({
-      name: trimmedName,
-      isArchived: newArchived,
-      isOwner: true,
-      itemsCount: 0
-    });
-
-    handleCloseAdd();
+    setError("");
+    try {
+      await api.create({ name: trimmedName, isArchived: newArchived });
+      await load();
+      handleCloseAdd();
+    } catch (e) {
+      setError(e?.message || "Failed to create list");
+    }
   }
 
   function handleRequestDelete(list) {
@@ -48,10 +72,17 @@ function ShoppingListOverviewRoute({ lists, onCreateList, onDeleteList, onOpenLi
     setDeleteTarget(null);
   }
 
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (!deleteTarget) return;
-    onDeleteList(deleteTarget.id);
-    setDeleteTarget(null);
+
+    setError("");
+    try {
+      await api.remove({ id: deleteTarget.id });
+      await load();
+      setDeleteTarget(null);
+    } catch (e) {
+      setError(e?.message || "Failed to delete list");
+    }
   }
 
   function handleOpenDetail(list) {
@@ -70,11 +101,16 @@ function ShoppingListOverviewRoute({ lists, onCreateList, onDeleteList, onOpenLi
         onOpenAdd={handleOpenAdd}
       />
 
-      <ShoppingListGrid
-        lists={visibleLists}
-        onOpenDetail={handleOpenDetail}
-        onRequestDelete={handleRequestDelete}
-      />
+      {error && <div className="OverviewEmpty">{error}</div>}
+      {loading && <div className="OverviewEmpty">Loading...</div>}
+
+      {!loading && (
+        <ShoppingListGrid
+          lists={visibleLists}
+          onOpenDetail={handleOpenDetail}
+          onRequestDelete={handleRequestDelete}
+        />
+      )}
 
       {isAddOpen && (
         <AddListModal
@@ -117,11 +153,7 @@ function OverviewToolbar({ showArchived, onToggleFilter, onOpenAdd }) {
 
 function ShoppingListGrid({ lists, onOpenDetail, onRequestDelete }) {
   if (lists.length === 0) {
-    return (
-      <div className="OverviewEmpty">
-        Žádné nákupní seznamy k zobrazení.
-      </div>
-    );
+    return <div className="OverviewEmpty">Žádné nákupní seznamy k zobrazení.</div>;
   }
 
   return (
@@ -141,11 +173,7 @@ function ShoppingListGrid({ lists, onOpenDetail, onRequestDelete }) {
 function ShoppingListTile({ list, onOpenDetail, onRequestDelete }) {
   return (
     <div className="Tile">
-      <div
-        className="TileMain"
-        onClick={() => onOpenDetail(list)}
-        role="button"
-      >
+      <div className="TileMain" onClick={() => onOpenDetail(list)} role="button">
         <div className="TileTitleRow">
           <span className="TileTitle">{list.name}</span>
           {list.isArchived && <span className="TileBadge">Archivovaný</span>}
@@ -168,14 +196,7 @@ function ShoppingListTile({ list, onOpenDetail, onRequestDelete }) {
   );
 }
 
-function AddListModal({
-  name,
-  isArchived,
-  onChangeName,
-  onChangeArchived,
-  onSubmit,
-  onCancel
-}) {
+function AddListModal({ name, isArchived, onChangeName, onChangeArchived, onSubmit, onCancel }) {
   return (
     <div className="ModalOverlay">
       <div className="Modal">
