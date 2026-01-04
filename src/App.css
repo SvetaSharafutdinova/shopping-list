@@ -1,32 +1,52 @@
+:root {
+  --bg: #fdfaf2;
+  --text: #1f2937;
+  --muted: #6b7280;
+
+  --panel: #fdf3d7;
+  --card: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+
+  --primary: #8bc34a;
+  --accent: #ff9800;
+  --danger: #f44336;
+
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+
+  --panel: #111827;
+  --card: #0b1220;
+  --border: rgba(255, 255, 255, 0.12);
+
+  --primary: #8bc34a;
+  --accent: #ff9800;
+  --danger: #f87171;
+
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
 .page {
   padding: 16px;
-  background-color: #fdfaf2;
+  background-color: var(--bg);
   min-height: 100vh;
   box-sizing: border-box;
-}
-
-.list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #a6cf4a;
-  color: #fff;
-  padding: 12px 16px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-}
-
-.list-header__title {
-  margin: 0;
-}
-
-.list-header__archived {
-  font-size: 0.8rem;
-  margin-left: 8px;
-}
-
-.list-header__right button {
-  margin-left: 8px;
 }
 
 .content {
@@ -35,103 +55,86 @@
 }
 
 .panel {
-  background: #fdf3d7;
-  border-radius: 4px;
-  padding: 8px 12px 12px;
+  background: var(--panel);
+  border-radius: 8px;
+  padding: 12px;
   flex: 1;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .panel__header {
-  font-weight: bold;
-  margin-bottom: 8px;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
-.members-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.member-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-.member-row__icon {
-  margin-right: 6px;
-}
-
-.member-row__name {
-  flex: 1;
-}
-
-.member-row__leave {
-  margin-right: 4px;
-}
-
-.members-panel__add {
-  margin-top: 8px;
-  width: 100%;
-}
-
+.members-list,
 .items-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+.member-row,
 .item-row {
   display: flex;
   align-items: center;
-  margin-bottom: 4px;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.member-row__icon {
+  opacity: 0.9;
+}
+
+.member-row__name,
+.item-row__name {
+  flex: 1;
+}
+
+.items-panel__add,
+.members-panel__add {
+  margin-top: 10px;
+  width: 100%;
 }
 
 .item-row__status {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid #a6cf4a;
-  background: white;
-  margin-right: 8px;
+  border: 2px solid var(--primary);
+  background: var(--card);
   cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: var(--text);
 }
 
 .item-row__status--done {
-  background: #a6cf4a;
-  color: white;
-}
-
-.item-row__name {
-  flex: 1;
+  background: var(--primary);
+  color: #fff;
 }
 
 .item-row__name--done {
   text-decoration: line-through;
-  color: #777;
-}
-
-.items-panel__add {
-  margin-top: 8px;
-  width: 100%;
+  color: var(--muted);
 }
 
 .filter-button {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .OverviewRoot {
   min-height: 100vh;
-  background: #f3f5f7;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .OverviewHeader {
-  background: #8bc34a;
+  background: var(--primary);
   color: #fff;
   padding: 16px 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow);
 }
 
 .OverviewHeader h1 {
@@ -156,24 +159,24 @@
 .ToolbarButton,
 .PrimaryButton,
 .DeleteButton {
-  border: none;
+  border: 1px solid var(--border);
   padding: 8px 14px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-}
-
-.ToolbarButton {
-  background: #e0e0e0;
+  background: var(--card);
+  color: var(--text);
 }
 
 .PrimaryButton {
-  background: #ff9800;
+  background: var(--accent);
+  border-color: rgba(0, 0, 0, 0.1);
   color: #fff;
 }
 
 .DeleteButton {
-  background: #f44336;
+  background: var(--danger);
+  border-color: rgba(0, 0, 0, 0.1);
   color: #fff;
 }
 
@@ -190,13 +193,14 @@
 }
 
 .Tile {
-  background: #ffffff;
-  border-radius: 8px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
   padding: 12px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow);
 }
 
 .TileMain {
@@ -208,44 +212,49 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  gap: 10px;
 }
 
 .TileTitle {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .TileBadge {
   font-size: 12px;
-  padding: 2px 6px;
+  padding: 2px 8px;
   border-radius: 999px;
-  background: #9e9e9e;
+  background: rgba(0, 0, 0, 0.25);
   color: #fff;
+}
+
+[data-theme="dark"] .TileBadge {
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .TileMeta {
   display: flex;
   gap: 12px;
   font-size: 13px;
-  color: #555;
+  color: var(--muted);
 }
 
 .TileActions {
   display: flex;
   align-items: flex-start;
-  margin-left: 8px;
+  margin-left: 10px;
 }
 
 .OverviewEmpty {
   padding: 24px;
   text-align: center;
-  color: #666;
+  color: var(--muted);
 }
 
 .ModalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -253,12 +262,18 @@
 }
 
 .Modal {
-  background: #ffffff;
+  background: var(--card);
+  color: var(--text);
   padding: 20px 24px;
-  border-radius: 8px;
+  border-radius: 12px;
   max-width: 420px;
   width: 100%;
-  margin: 0 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.Modal h2 {
+  margin-top: 0;
 }
 
 .ModalForm {
@@ -270,14 +285,16 @@
 .ModalField {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   font-size: 14px;
 }
 
 .ModalField input {
-  padding: 6px 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
 }
 
 .ModalCheckbox {
@@ -311,6 +328,6 @@
   }
 
   .Modal {
-    width: calc(100% - 24px);
+    margin: 0 12px;
   }
 }

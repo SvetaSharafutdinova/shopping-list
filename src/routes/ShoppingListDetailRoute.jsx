@@ -6,31 +6,35 @@ import MembersPanel from "../components/MembersPanel";
 import ItemsPanel from "../components/ItemsPanel";
 
 const CURRENT_USER_ID = "u1";
-const DEFAULT_LIST_ID = "list1";
 
-function ShoppingListDetailRoute({ listId = DEFAULT_LIST_ID }) {
+function ShoppingListDetailRoute({ listId }) {
   const [list, setList] = useState(null);
   const [showDone, setShowDone] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
+  async function load(id) {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await api.get({ id });
+      setList(data);
+    } catch (e) {
+      setError(e?.message || "Failed to load list");
+      setList(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
+    if (!listId) return;
     let active = true;
 
     (async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const data = await api.get({ id: listId });
-        if (!active) return;
-        setList(data);
-      } catch (e) {
-        if (!active) return;
-        setError(e?.message || "Failed to load list");
-      } finally {
-        if (!active) return;
-        setLoading(false);
-      }
+      if (!active) return;
+      await load(listId);
     })();
 
     return () => {
@@ -43,40 +47,73 @@ function ShoppingListDetailRoute({ listId = DEFAULT_LIST_ID }) {
     return list.ownerId === CURRENT_USER_ID;
   }, [list]);
 
-  function handleRename() {
-    if (!list || !isOwner || list.isArchived) return;
+  async function handleRename() {
+    if (!list || !isOwner || list.isArchived || busy) return;
     const newName = window.prompt("Nový název seznamu:", list.name);
-    if (newName && newName.trim()) {
-      setList({ ...list, name: newName.trim() });
+    const trimmed = (newName || "").trim();
+    if (!trimmed) return;
+
+    setBusy(true);
+    setError("");
+    try {
+      await api.update({ id: list.id, name: trimmed });
+      await load(list.id);
+    } catch (e) {
+      setError(e?.message || "Failed to rename list");
+    } finally {
+      setBusy(false);
     }
   }
 
-  function handleArchive() {
-    if (!list || !isOwner) return;
-    setList({ ...list, isArchived: true });
+  async function handleArchive() {
+    if (!list || !isOwner || busy) return;
+
+    setBusy(true);
+    setError("");
+    try {
+      await api.update({ id: list.id, isArchived: true });
+      await load(list.id);
+    } catch (e) {
+      setError(e?.message || "Failed to archive list");
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function handleDeleteList() {
-    if (!list || !isOwner) return;
-    if (window.confirm("Opravdu smazat seznam?")) {
-      alert("Tady by se volalo API pro smazání. Zatím jen simulace.");
+  async function handleDeleteList() {
+    if (!list || !isOwner || busy) return;
+    const ok = window.confirm("Opravdu smazat seznam?");
+    if (!ok) return;
+
+    setBusy(true);
+    setError("");
+    try {
+      await api.remove({ id: list.id });
+      setList(null);
+    } catch (e) {
+      setError(e?.message || "Failed to delete list");
+    } finally {
+      setBusy(false);
     }
   }
 
   function handleAddMember() {
-    if (!list || !isOwner || list.isArchived) return;
+    if (!list || !isOwner || list.isArchived || busy) return;
     const name = window.prompt("Jméno nového člena:");
-    if (!name || !name.trim()) return;
+    const trimmed = (name || "").trim();
+    if (!trimmed) return;
+
     const newId = "u" + (list.members.length + 1);
     setList({
       ...list,
-      members: [...list.members, { id: newId, name: name.trim() }]
+      members: [...list.members, { id: newId, name: trimmed }]
     });
   }
 
   function handleRemoveMember(memberId) {
-    if (!list || !isOwner || list.isArchived) return;
+    if (!list || !isOwner || list.isArchived || busy) return;
     if (memberId === CURRENT_USER_ID) return;
+
     setList({
       ...list,
       members: list.members.filter((m) => m.id !== memberId)
@@ -84,12 +121,12 @@ function ShoppingListDetailRoute({ listId = DEFAULT_LIST_ID }) {
   }
 
   function handleLeave() {
-    if (!list || isOwner) return;
+    if (!list || isOwner || busy) return;
+
     setList({
       ...list,
       members: list.members.filter((m) => m.id !== CURRENT_USER_ID)
     });
-    alert("Odešel jsi ze seznamu (jen na FE).");
   }
 
   function handleToggleFilter() {
@@ -97,18 +134,20 @@ function ShoppingListDetailRoute({ listId = DEFAULT_LIST_ID }) {
   }
 
   function handleAddItem() {
-    if (!list || list.isArchived) return;
+    if (!list || list.isArchived || busy) return;
     const name = window.prompt("Název položky:");
-    if (!name || !name.trim()) return;
+    const trimmed = (name || "").trim();
+    if (!trimmed) return;
+
     const newId = "i" + (list.items.length + 1);
     setList({
       ...list,
-      items: [...list.items, { id: newId, name: name.trim(), isDone: false }]
+      items: [...list.items, { id: newId, name: trimmed, isDone: false }]
     });
   }
 
   function handleDeleteItem(itemId) {
-    if (!list || list.isArchived) return;
+    if (!list || list.isArchived || busy) return;
     setList({
       ...list,
       items: list.items.filter((i) => i.id !== itemId)
@@ -116,13 +155,17 @@ function ShoppingListDetailRoute({ listId = DEFAULT_LIST_ID }) {
   }
 
   function handleToggleDone(itemId) {
-    if (!list || list.isArchived) return;
+    if (!list || list.isArchived || busy) return;
     setList({
       ...list,
       items: list.items.map((i) =>
         i.id === itemId ? { ...i, isDone: !i.isDone } : i
       )
     });
+  }
+
+  if (!listId) {
+    return <div className="page">No list selected</div>;
   }
 
   if (loading) {

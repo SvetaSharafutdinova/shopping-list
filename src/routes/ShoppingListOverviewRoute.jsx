@@ -1,8 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { I18nContext } from "../context/I18nContext";
+import TopBar from "../components/TopBar";
+import OverviewItemsChart from "../components/OverviewItemsChart";
 import "../App.css";
 import api from "../api/shoppingListApi";
 
 function ShoppingListOverviewRoute({ onOpenList }) {
+  const { t, lang, setLang, theme, setTheme } = useContext(I18nContext);
+
   const [showArchived, setShowArchived] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -20,7 +25,7 @@ function ShoppingListOverviewRoute({ onOpenList }) {
       const res = await api.list({ includeArchived: true });
       setLists(res.itemList || []);
     } catch (e) {
-      setError(e?.message || "Failed to load lists");
+      setError(e?.message || t("common.loadError"));
     } finally {
       setLoading(false);
     }
@@ -59,7 +64,7 @@ function ShoppingListOverviewRoute({ onOpenList }) {
       await load();
       handleCloseAdd();
     } catch (e) {
-      setError(e?.message || "Failed to create list");
+      setError(e?.message || t("overview.createError"));
     }
   }
 
@@ -81,7 +86,7 @@ function ShoppingListOverviewRoute({ onOpenList }) {
       await load();
       setDeleteTarget(null);
     } catch (e) {
-      setError(e?.message || "Failed to delete list");
+      setError(e?.message || t("overview.deleteError"));
     }
   }
 
@@ -91,29 +96,46 @@ function ShoppingListOverviewRoute({ onOpenList }) {
 
   return (
     <div className="OverviewRoot">
-      <header className="OverviewHeader">
-        <h1>Nákupní seznamy</h1>
-      </header>
-
-      <OverviewToolbar
-        showArchived={showArchived}
-        onToggleFilter={handleToggleFilter}
-        onOpenAdd={handleOpenAdd}
+      <TopBar
+        title={t("overview.title")}
+        lang={lang}
+        onLangChange={setLang}
+        theme={theme}
+        onThemeChange={setTheme}
       />
 
+      <div className="OverviewToolbar">
+        <div className="OverviewToolbarLeft">
+          <button className="ToolbarButton" onClick={handleToggleFilter}>
+            {showArchived ? t("overview.showActive") : t("overview.showArchived")}
+          </button>
+        </div>
+        <div className="OverviewToolbarRight">
+          <button className="PrimaryButton" onClick={handleOpenAdd}>
+            {t("overview.addNew")}
+          </button>
+        </div>
+      </div>
+
+      <div className="OverviewChartWrap">
+        <OverviewItemsChart lists={visibleLists} />
+      </div>
+
       {error && <div className="OverviewEmpty">{error}</div>}
-      {loading && <div className="OverviewEmpty">Loading...</div>}
+      {loading && <div className="OverviewEmpty">{t("common.loading")}</div>}
 
       {!loading && (
         <ShoppingListGrid
           lists={visibleLists}
           onOpenDetail={handleOpenDetail}
           onRequestDelete={handleRequestDelete}
+          t={t}
         />
       )}
 
       {isAddOpen && (
         <AddListModal
+          t={t}
           name={newName}
           isArchived={newArchived}
           onChangeName={setNewName}
@@ -125,6 +147,7 @@ function ShoppingListOverviewRoute({ onOpenList }) {
 
       {deleteTarget && (
         <DeleteConfirmModal
+          t={t}
           list={deleteTarget}
           onCancel={handleCancelDelete}
           onConfirm={handleConfirmDelete}
@@ -134,26 +157,9 @@ function ShoppingListOverviewRoute({ onOpenList }) {
   );
 }
 
-function OverviewToolbar({ showArchived, onToggleFilter, onOpenAdd }) {
-  return (
-    <div className="OverviewToolbar">
-      <div className="OverviewToolbarLeft">
-        <button className="ToolbarButton" onClick={onToggleFilter}>
-          {showArchived ? "Zobrazit jen aktivní" : "Zobrazit včetně archivovaných"}
-        </button>
-      </div>
-      <div className="OverviewToolbarRight">
-        <button className="PrimaryButton" onClick={onOpenAdd}>
-          + Přidat nový seznam
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function ShoppingListGrid({ lists, onOpenDetail, onRequestDelete }) {
+function ShoppingListGrid({ lists, onOpenDetail, onRequestDelete, t }) {
   if (lists.length === 0) {
-    return <div className="OverviewEmpty">Žádné nákupní seznamy k zobrazení.</div>;
+    return <div className="OverviewEmpty">{t("overview.empty")}</div>;
   }
 
   return (
@@ -164,23 +170,28 @@ function ShoppingListGrid({ lists, onOpenDetail, onRequestDelete }) {
           list={list}
           onOpenDetail={onOpenDetail}
           onRequestDelete={onRequestDelete}
+          t={t}
         />
       ))}
     </div>
   );
 }
 
-function ShoppingListTile({ list, onOpenDetail, onRequestDelete }) {
+function ShoppingListTile({ list, onOpenDetail, onRequestDelete, t }) {
   return (
     <div className="Tile">
       <div className="TileMain" onClick={() => onOpenDetail(list)} role="button">
         <div className="TileTitleRow">
           <span className="TileTitle">{list.name}</span>
-          {list.isArchived && <span className="TileBadge">Archivovaný</span>}
+          {list.isArchived && <span className="TileBadge">{t("overview.archived")}</span>}
         </div>
         <div className="TileMeta">
-          <span>Položky: {list.itemsCount}</span>
-          <span>Role: {list.isOwner ? "vlastník" : "člen"}</span>
+          <span>
+            {t("overview.items")}: {list.itemsCount}
+          </span>
+          <span>
+            {t("overview.role")}: {list.isOwner ? t("overview.owner") : t("overview.member")}
+          </span>
         </div>
       </div>
       <div className="TileActions">
@@ -189,26 +200,26 @@ function ShoppingListTile({ list, onOpenDetail, onRequestDelete }) {
           disabled={!list.isOwner}
           onClick={() => onRequestDelete(list)}
         >
-          Smazat
+          {t("overview.delete")}
         </button>
       </div>
     </div>
   );
 }
 
-function AddListModal({ name, isArchived, onChangeName, onChangeArchived, onSubmit, onCancel }) {
+function AddListModal({ t, name, isArchived, onChangeName, onChangeArchived, onSubmit, onCancel }) {
   return (
     <div className="ModalOverlay">
       <div className="Modal">
-        <h2>Nový nákupní seznam</h2>
+        <h2>{t("overview.newTitle")}</h2>
         <form onSubmit={onSubmit} className="ModalForm">
           <label className="ModalField">
-            Název
+            {t("overview.name")}
             <input
               type="text"
               value={name}
               onChange={(e) => onChangeName(e.target.value)}
-              placeholder="Název seznamu"
+              placeholder={t("overview.namePlaceholder")}
             />
           </label>
           <label className="ModalCheckbox">
@@ -217,14 +228,14 @@ function AddListModal({ name, isArchived, onChangeName, onChangeArchived, onSubm
               checked={isArchived}
               onChange={(e) => onChangeArchived(e.target.checked)}
             />
-            Vytvořit rovnou jako archivovaný
+            {t("overview.createArchived")}
           </label>
           <div className="ModalButtons">
             <button type="button" onClick={onCancel}>
-              Zavřít
+              {t("common.close")}
             </button>
             <button type="submit" className="PrimaryButton">
-              Vytvořit
+              {t("common.create")}
             </button>
           </div>
         </form>
@@ -233,18 +244,20 @@ function AddListModal({ name, isArchived, onChangeName, onChangeArchived, onSubm
   );
 }
 
-function DeleteConfirmModal({ list, onCancel, onConfirm }) {
+function DeleteConfirmModal({ t, list, onCancel, onConfirm }) {
   return (
     <div className="ModalOverlay">
       <div className="Modal">
-        <h2>Smazat seznam</h2>
-        <p>Opravdu chcete smazat seznam „{list.name}“?</p>
+        <h2>{t("overview.deleteTitle")}</h2>
+        <p>
+          {t("overview.deleteConfirm")} „{list.name}“?
+        </p>
         <div className="ModalButtons">
           <button type="button" onClick={onCancel}>
-            Zrušit
+            {t("common.cancel")}
           </button>
           <button type="button" className="DeleteButton" onClick={onConfirm}>
-            Smazat
+            {t("overview.delete")}
           </button>
         </div>
       </div>
